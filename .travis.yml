@@ -8,3 +8,7 @@ deploy:
   acl: bucket_owner_full_control
   on:
     repo: bitsmag/accSlDeployment
+  region: us-west-2
+
+
+
