@@ -1,0 +1,295 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AccSl Cft
+Parameters:
+  Region:
+    Type: String
+    Default: us-west-2
+Resources:
+  CopyAccFrontendFilesRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: CopyAccFrontendPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: ListSourceAndDestinationBuckets
+                Effect: Allow
+                Action:
+                  - s3:ListBucket
+                  - s3:ListBucketVersions
+                Resource:
+                  - arn:aws:s3:::acc.frontend.build
+                  - arn:aws:s3:::acc.frontend
+              - Sid: SourceBucketGetObjectAccess
+                Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                Resource: arn:aws:s3:::acc.frontend.build/*
+              - Sid: DestinationBucketPutObjectAccess
+                Effect: Allow
+                Action:
+                  - s3:PutObject
+                Resource: 
+                  - arn:aws:s3:::acc.frontend/*
+  CopyAccFrontendFiles:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: index.handler
+      Role: !GetAtt 'CopyAccFrontendFilesRole.Arn'
+      Code:
+        ZipFile: !Join
+          - "\n"
+          - - 'const aws = require("aws-sdk");'
+            - 'const response = require("cfn-response");'
+            - 'const s3 = new aws.S3({apiVersion: "2006-03-01"});'
+            - 'var srcBucket = "acc.frontend.build";'
+            - 'var destBucket = "acc.frontend";'
+            - 'exports.handler = (event, context, callback) => {'
+            - '    // Copy all files from srcBucket to destBucket'
+            - '    var allKeys = [];'
+            - '    listAllKeys(null, function() {'
+            - '        var failed = false;'
+            - '        for (let key of allKeys) {'
+            - '            s3.copyObject({'
+            - '                CopySource: srcBucket + "/" + key,'
+            - '                Bucket: destBucket,'
+            - '                Key: key'
+            - '            }, function(copyErr, copyData){'
+            - '               if (copyErr) {'
+            - '                failed = true;'
+            - '                console.log("Error: " + copyErr);'
+            - '               } else {'
+            - '                console.log("Copied OK");'
+            - '               } '
+            - '        });'
+            - '        // Send response to cloudformation / custom resouce'
+            - '        if(failed) {'
+            - '           var responseData = {Message: "Failed to deploye static files"};'
+            - '           response.send(event, context, "FAILED", responseData);'
+            - '        }'
+            - '        else {'
+            - '           var responseData = {Message: "Successfully deployed static files"};'
+            - '           response.send(event, context, "SUCCESS", responseData);'
+            - '        }'
+            - '        }'
+            - '    });'
+            - '    // List files in bucket'
+            - '    function listAllKeys(token, cb)'
+            - '    {'
+            - '    var opts = { Bucket: srcBucket };'
+            - '    if(token) opts.ContinuationToken = token;'
+            - '    s3.listObjectsV2(opts, function(err, data){'
+            - '        for(let i = 0; i < data.Contents.length; i++) {'
+            - '            allKeys.push(data.Contents[i].Key);'
+            - '        }'
+            - '        if(data.IsTruncated)'
+            - '        listAllKeys(data.NextContinuationToken, cb);'
+            - '        else'
+            - '        cb();'
+            - '    });'
+            - '    }'
+            - '};'
+      Runtime: nodejs6.10
+  DoCopyAccFrontendFiles:
+    Type: Custom::DoCopyAccFrontendFiles
+    Properties:
+      ServiceToken: !GetAtt 'CopyAccFrontendFiles.Arn'
+
+  WriteApiGatewayUrlToAccFrontendFiles:
+      Type: AWS::Lambda::Function
+      Properties:
+        Handler: index.handler
+        Role: !GetAtt 'CopyAccFrontendFilesRole.Arn'
+        Code:
+          ZipFile: !Join
+            - "\n"
+            - - 'const aws = require("aws-sdk");'
+              - 'const response = require("cfn-response");'
+              - 'const s3 = new aws.S3();'
+              - 'var params = {'
+              - '    Bucket : "acc.frontend",'
+              - '    Key : "apiBaseUrl.json",'
+              - '}'
+              - 'exports.handler = (event, context, callback) => {'
+              - '    params.Body = "{\"url\": \"" + event.ResourceProperties.Body + "\"}";'
+              - '    s3.putObject(params, function(err, data) {'
+              - '        if (err) {'
+              - '            var responseData = {Message: "Failed to write api-gateway URL to acc frontend files"};'
+              - '            response.send(event, context, "FAILED", responseData);'
+              - '        }'
+              - '        else {'
+              - '            var responseData = {Message: "Successfully wrote api-gateway URL to acc frontend files"};'
+              - '            response.send(event, context, "SUCCESS", responseData);'
+              - '        }'
+              - '    });'
+              - '}'
+        Runtime: nodejs6.10
+  DoWriteApiGatewayUrlToAccFrontendFiles:
+    Type: Custom::DoWriteApiGatewayUrlToAccFrontendFiles
+    Properties: 
+      ServiceToken: !GetAtt 'WriteApiGatewayUrlToAccFrontendFiles.Arn'
+      Body: !Join
+          - ''
+          - - 'https://'
+            - !Ref AccSlApiGateway
+            - 'execute-api.us-west-2.amazonaws.com/dev/'
+
+  BalancesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        -
+          AttributeName: "AccId"
+          AttributeType: "S"
+      KeySchema:
+        - 
+          AttributeName: "AccId"
+          KeyType: "HASH"
+      ProvisionedThroughput: 
+        ReadCapacityUnits: "5"
+        WriteCapacityUnits: "5"
+  LogTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        -
+          AttributeName: "BookingId"
+          AttributeType: "S"
+      KeySchema:
+        - 
+          AttributeName: "BookingId"
+          KeyType: "HASH"
+      ProvisionedThroughput: 
+        ReadCapacityUnits: "5"
+        WriteCapacityUnits: "5"
+
+  AccSlMainBackendInstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Roles:
+        - !Ref AccSlMainBackendInstanceProfileRole
+
+  AccSlMainBackendInstanceProfileRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: 'ec2.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AWSElasticBeanstalkWebTier'
+        - 'arn:aws:iam::aws:policy/AWSElasticBeanstalkWorkerTier'
+      Policies:
+        - PolicyName: DynamoDbAccSLAccess
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: DynamoDbAccTablesAccess
+                Effect: Allow
+                Action:
+                  - 'dynamodb:CreateTable'
+                  - 'dynamodb:PutItem'
+                  - 'dynamodb:GetItem'
+                  - 'dynamodb:Scan'
+                  - 'dynamodb:DeleteTable'
+                Resource:
+                  - !Join #arn:aws:dynamodb:<region>:<accountId>:table/<tableName>
+                    - ''
+                    - - 'arn:aws:dynamodb:'
+                      - !Ref 'AWS::Region'
+                      - ':'
+                      - !Ref 'AWS::AccountId'
+                      - ':table/'
+                      - !Ref BalancesTable
+                  - !Join 
+                    - ''
+                    - - 'arn:aws:dynamodb:'
+                      - !Ref 'AWS::Region'
+                      - ':'
+                      - !Ref 'AWS::AccountId'
+                      - ':table/'
+                      - !Ref LogTable
+              - Sid: DynamoDbListTableAccess
+                Effect: Allow
+                Action:
+                  - 'dynamodb:ListTables'
+                Resource: '*'
+
+  AccSlMainBackendServiceRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: ''
+            Effect: Allow
+            Principal:
+              Service: 'elasticbeanstalk.amazonaws.com'
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AWSElasticBeanstalkEnhancedHealth'
+
+  AccSlMainBackendApplication:
+    Type: AWS::ElasticBeanstalk::Application
+    Properties:
+      ApplicationName: AccSlMainBackendApplication
+  AccSlMainBackendApplicationVersion:
+    Type: AWS::ElasticBeanstalk::ApplicationVersion
+    Properties:
+      ApplicationName: !Ref AccSlMainBackendApplication
+      SourceBundle:
+        S3Bucket: 'acc.mainbackend.build'
+        S3Key: Archive.zip
+  AccSlMainBackendEnv:
+    Type: AWS::ElasticBeanstalk::Environment
+    Properties:
+      ApplicationName: !Ref AccSlMainBackendApplication
+      VersionLabel: !Ref AccSlMainBackendApplicationVersion
+      SolutionStackName: '64bit Amazon Linux 2018.03 v2.8.1 running Go 1.10'
+      OptionSettings: 
+        - Namespace: aws:autoscaling:launchconfiguration
+          OptionName: IamInstanceProfile
+          Value: !Ref AccSlMainBackendInstanceProfile
+        - Namespace: aws:autoscaling:launchconfiguration
+          OptionName: InstanceType
+          Value: 't2.micro'
+        - Namespace: aws:elasticbeanstalk:environment
+          OptionName: ServiceRole
+          Value: !Ref AccSlMainBackendServiceRole
+        - Namespace: aws:elasticbeanstalk:application:environment
+          OptionName: TABLENAME_LOG
+          Value: !Ref LogTable
+        - Namespace: aws:elasticbeanstalk:application:environment
+          OptionName: TABLENAME_BALANCES
+          Value: !Ref BalancesTable
+  
+  AccSlApiGateway: 
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      BodyS3Location:
+        Bucket: 'acc.cloudformation.build'
+        Key: 'accSlApiGateway.yaml'
+  AccSlApiGatewayDeployment: 
+    Type: AWS::ApiGateway::Deployment
+    Properties: 
+      RestApiId: 
+        Ref: 'AccSlApiGateway'
+      StageName: 'dev'
+      StageDescription:
+        Variables:
+          MainBackendUrl: !GetAtt 'AccSlMainBackendEnv.EndpointURL'
