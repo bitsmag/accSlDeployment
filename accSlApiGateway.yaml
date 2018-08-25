@@ -1,16 +1,15 @@
----
 swagger: "2.0"
 info:
   version: "2018-08-04T07:50:59Z"
   title: "accApiSl"
 basePath: "/dev"
 schemes:
-- "https"
+  - "https"
 paths:
   /balance:
     get:
       produces:
-      - "text/plain"
+        - "text/plain"
       responses:
         200:
           description: "200 response"
@@ -31,9 +30,9 @@ paths:
         type: "http"
     options:
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       responses:
         200:
           description: "200 response"
@@ -56,14 +55,14 @@ paths:
               method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_match"
         requestTemplates:
-          application/json: "{\"statusCode\": 200}"
+          application/json: '{"statusCode": 200}'
         type: "mock"
   /log:
     get:
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "text/plain"
+        - "text/plain"
       responses:
         200:
           description: "200 response"
@@ -84,15 +83,16 @@ paths:
         passthroughBehavior: "when_no_templates"
         httpMethod: "POST"
         requestTemplates:
-          application/json: "{\n    \"order\" : \"\",\n    \"date\" : \"\",\n    \"\
+          application/json:
+            "{\n    \"order\" : \"\",\n    \"date\" : \"\",\n    \"\
             category\" : \"\"\n}"
         contentHandling: "CONVERT_TO_TEXT"
         type: "aws"
     options:
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       responses:
         200:
           description: "200 response"
@@ -115,19 +115,19 @@ paths:
               method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_match"
         requestTemplates:
-          application/json: "{\"statusCode\": 200}"
+          application/json: '{"statusCode": 200}'
         type: "mock"
   /log/{order}:
     get:
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "text/plain"
+        - "text/plain"
       parameters:
-      - name: "order"
-        in: "path"
-        required: true
-        type: "string"
+        - name: "order"
+          in: "path"
+          required: true
+          type: "string"
       responses:
         200:
           description: "200 response"
@@ -137,7 +137,7 @@ paths:
             Access-Control-Allow-Origin:
               type: "string"
       x-amazon-apigateway-integration:
-        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:421939066732:function:acc_lambda_go/invocations"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/${stageVariables.LogFunctionArn}/invocations"
         responses:
           default:
             statusCode: "200"
@@ -148,15 +148,16 @@ paths:
         passthroughBehavior: "when_no_templates"
         httpMethod: "POST"
         requestTemplates:
-          application/json: "{\n    \"order\" : \"$input.params('order')\",\n    \"\
+          application/json:
+            "{\n    \"order\" : \"$input.params('order')\",\n    \"\
             date\" : \"\",\n    \"category\" : \"\"\n}"
         contentHandling: "CONVERT_TO_TEXT"
         type: "aws"
     options:
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       responses:
         200:
           description: "200 response"
@@ -179,23 +180,23 @@ paths:
               method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_match"
         requestTemplates:
-          application/json: "{\"statusCode\": 200}"
+          application/json: '{"statusCode": 200}'
         type: "mock"
   /log/{order}/{date}:
     get:
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "text/plain"
+        - "text/plain"
       parameters:
-      - name: "date"
-        in: "path"
-        required: true
-        type: "string"
-      - name: "order"
-        in: "path"
-        required: true
-        type: "string"
+        - name: "date"
+          in: "path"
+          required: true
+          type: "string"
+        - name: "order"
+          in: "path"
+          required: true
+          type: "string"
       responses:
         200:
           description: "200 response"
@@ -216,15 +217,16 @@ paths:
         passthroughBehavior: "when_no_templates"
         httpMethod: "POST"
         requestTemplates:
-          application/json: "{\n    \"order\" : \"$input.params('order')\",\n    \"\
+          application/json:
+            "{\n    \"order\" : \"$input.params('order')\",\n    \"\
             date\" : \"$input.params('date')\",\n    \"category\" : \"\"\n}"
         contentHandling: "CONVERT_TO_TEXT"
         type: "aws"
     options:
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       responses:
         200:
           description: "200 response"
@@ -247,27 +249,27 @@ paths:
               method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_match"
         requestTemplates:
-          application/json: "{\"statusCode\": 200}"
+          application/json: '{"statusCode": 200}'
         type: "mock"
   /log/{order}/{date}/{category}:
     get:
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "text/plain"
+        - "text/plain"
       parameters:
-      - name: "category"
-        in: "path"
-        required: true
-        type: "string"
-      - name: "date"
-        in: "path"
-        required: true
-        type: "string"
-      - name: "order"
-        in: "path"
-        required: true
-        type: "string"
+        - name: "category"
+          in: "path"
+          required: true
+          type: "string"
+        - name: "date"
+          in: "path"
+          required: true
+          type: "string"
+        - name: "order"
+          in: "path"
+          required: true
+          type: "string"
       responses:
         200:
           description: "200 response"
@@ -288,16 +290,17 @@ paths:
         passthroughBehavior: "when_no_templates"
         httpMethod: "POST"
         requestTemplates:
-          application/json: "{\n    \"order\" : \"$input.params('order')\",\n    \"\
+          application/json:
+            "{\n    \"order\" : \"$input.params('order')\",\n    \"\
             date\" : \"$input.params('date')\",\n    \"category\" : \"$input.params('category')\"\
             \n}"
         contentHandling: "CONVERT_TO_TEXT"
         type: "aws"
     options:
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       responses:
         200:
           description: "200 response"
@@ -320,14 +323,14 @@ paths:
               method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_match"
         requestTemplates:
-          application/json: "{\"statusCode\": 200}"
+          application/json: '{"statusCode": 200}'
         type: "mock"
   /pin:
     options:
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       responses:
         200:
           description: "200 response"
@@ -350,17 +353,17 @@ paths:
               method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_match"
         requestTemplates:
-          application/json: "{\"statusCode\": 200}"
+          application/json: '{"statusCode": 200}'
         type: "mock"
   /pin/{amount}:
     get:
       produces:
-      - "text/plain"
+        - "text/plain"
       parameters:
-      - name: "amount"
-        in: "path"
-        required: true
-        type: "string"
+        - name: "amount"
+          in: "path"
+          required: true
+          type: "string"
       responses:
         200:
           description: "200 response"
@@ -383,9 +386,9 @@ paths:
         type: "http"
     options:
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       responses:
         200:
           description: "200 response"
@@ -408,21 +411,21 @@ paths:
               method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_match"
         requestTemplates:
-          application/json: "{\"statusCode\": 200}"
+          application/json: '{"statusCode": 200}'
         type: "mock"
   /pin/{amount}/{date}:
     get:
       produces:
-      - "text/plain"
+        - "text/plain"
       parameters:
-      - name: "amount"
-        in: "path"
-        required: true
-        type: "string"
-      - name: "date"
-        in: "path"
-        required: true
-        type: "string"
+        - name: "amount"
+          in: "path"
+          required: true
+          type: "string"
+        - name: "date"
+          in: "path"
+          required: true
+          type: "string"
       responses:
         200:
           description: "200 response"
@@ -446,9 +449,9 @@ paths:
         type: "http"
     options:
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       responses:
         200:
           description: "200 response"
@@ -471,25 +474,25 @@ paths:
               method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_match"
         requestTemplates:
-          application/json: "{\"statusCode\": 200}"
+          application/json: '{"statusCode": 200}'
         type: "mock"
   /pin/{amount}/{date}/{category}:
     get:
       produces:
-      - "text/plain"
+        - "text/plain"
       parameters:
-      - name: "category"
-        in: "path"
-        required: true
-        type: "string"
-      - name: "amount"
-        in: "path"
-        required: true
-        type: "string"
-      - name: "date"
-        in: "path"
-        required: true
-        type: "string"
+        - name: "category"
+          in: "path"
+          required: true
+          type: "string"
+        - name: "amount"
+          in: "path"
+          required: true
+          type: "string"
+        - name: "date"
+          in: "path"
+          required: true
+          type: "string"
       responses:
         200:
           description: "200 response"
@@ -514,9 +517,9 @@ paths:
         type: "http"
     options:
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       responses:
         200:
           description: "200 response"
@@ -539,14 +542,14 @@ paths:
               method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_match"
         requestTemplates:
-          application/json: "{\"statusCode\": 200}"
+          application/json: '{"statusCode": 200}'
         type: "mock"
   /pout:
     options:
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       responses:
         200:
           description: "200 response"
@@ -569,17 +572,17 @@ paths:
               method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_match"
         requestTemplates:
-          application/json: "{\"statusCode\": 200}"
+          application/json: '{"statusCode": 200}'
         type: "mock"
   /pout/{amount}:
     get:
       produces:
-      - "text/plain"
+        - "text/plain"
       parameters:
-      - name: "amount"
-        in: "path"
-        required: true
-        type: "string"
+        - name: "amount"
+          in: "path"
+          required: true
+          type: "string"
       responses:
         200:
           description: "200 response"
@@ -602,9 +605,9 @@ paths:
         type: "http"
     options:
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       responses:
         200:
           description: "200 response"
@@ -627,21 +630,21 @@ paths:
               method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_match"
         requestTemplates:
-          application/json: "{\"statusCode\": 200}"
+          application/json: '{"statusCode": 200}'
         type: "mock"
   /pout/{amount}/{date}:
     get:
       produces:
-      - "text/plain"
+        - "text/plain"
       parameters:
-      - name: "amount"
-        in: "path"
-        required: true
-        type: "string"
-      - name: "date"
-        in: "path"
-        required: true
-        type: "string"
+        - name: "amount"
+          in: "path"
+          required: true
+          type: "string"
+        - name: "date"
+          in: "path"
+          required: true
+          type: "string"
       responses:
         200:
           description: "200 response"
@@ -665,9 +668,9 @@ paths:
         type: "http"
     options:
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       responses:
         200:
           description: "200 response"
@@ -690,25 +693,25 @@ paths:
               method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_match"
         requestTemplates:
-          application/json: "{\"statusCode\": 200}"
+          application/json: '{"statusCode": 200}'
         type: "mock"
   /pout/{amount}/{date}/{category}:
     get:
       produces:
-      - "text/plain"
+        - "text/plain"
       parameters:
-      - name: "category"
-        in: "path"
-        required: true
-        type: "string"
-      - name: "amount"
-        in: "path"
-        required: true
-        type: "string"
-      - name: "date"
-        in: "path"
-        required: true
-        type: "string"
+        - name: "category"
+          in: "path"
+          required: true
+          type: "string"
+        - name: "amount"
+          in: "path"
+          required: true
+          type: "string"
+        - name: "date"
+          in: "path"
+          required: true
+          type: "string"
       responses:
         200:
           description: "200 response"
@@ -733,9 +736,9 @@ paths:
         type: "http"
     options:
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       responses:
         200:
           description: "200 response"
@@ -758,7 +761,7 @@ paths:
               method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_match"
         requestTemplates:
-          application/json: "{\"statusCode\": 200}"
+          application/json: '{"statusCode": 200}'
         type: "mock"
 definitions:
   Empty:
