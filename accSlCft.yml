@@ -344,4 +344,4 @@ Resources:
         Variables:
           MainBackendUrl: !GetAtt 'AccSlMainBackendEnv.EndpointURL'
         Variables:
-          LogFunctionArn: !GetAtt 'AccSlLogFunction.arn'
+          LogFunctionName: !Ref AccSlLogFunction
