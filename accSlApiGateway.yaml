@@ -72,7 +72,7 @@ paths:
             Access-Control-Allow-Origin:
               type: "string"
       x-amazon-apigateway-integration:
-        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:421939066732:function:acc_lambda_go/invocations"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:421939066732:function:${stageVariables.LogFunctionName}/invocations"
         responses:
           default:
             statusCode: "200"
@@ -206,7 +206,7 @@ paths:
             Access-Control-Allow-Origin:
               type: "string"
       x-amazon-apigateway-integration:
-        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:421939066732:function:acc_lambda_go/invocations"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:421939066732:function:${stageVariables.LogFunctionName}/invocations"
         responses:
           default:
             statusCode: "200"
@@ -279,7 +279,7 @@ paths:
             Access-Control-Allow-Origin:
               type: "string"
       x-amazon-apigateway-integration:
-        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:421939066732:function:acc_lambda_go/invocations"
+        uri: "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:421939066732:function:${stageVariables.LogFunctionName}/invocations"
         responses:
           default:
             statusCode: "200"
